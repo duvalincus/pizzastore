@@ -326,7 +326,7 @@ public class PizzaStore {
    public static void Greeting(){
       System.out.println(
          "\n\n*******************************************************\n" +
-         "              User Interface      	               \n" +
+         "                  User Interface      	               \n" +
          "*******************************************************\n");
    }//end Greeting
 
@@ -355,14 +355,36 @@ public class PizzaStore {
     **/
    public static void CreateUser(PizzaStore esql){
    }//end CreateUser
-
+      
 
    /*
     * Check log in credentials for an existing user
-    * @return User login or null is the user does not exist
+    * @return User login or null if the user does not exist
     **/
    public static String LogIn(PizzaStore esql){
-      return null;
+      try {
+         System.out.println("Enter username: ");
+         String login = in.readLine();
+         System.out.println("Enter password:");
+         String password = in.readLine();
+         String query = String.format("SELECT u.login, u.password FROM Users u WHERE u.login = '%s' AND u.password = '%s'", login, password);
+         List<List<String>> result = esql.executeQueryAndReturnResult(query);
+         
+         System.out.println(result);
+
+         if (result.get(1).get(0) == login && result.get(1).get(1) == password) {
+            System.out.println("Username and password match! :}");
+            return login;
+         }
+         else {
+            System.out.println("User does not exist in database. :{");
+            return null;
+         }
+      }
+      catch (Exception e){
+         System.out.println(e);
+         return null;
+      }
    }//end
 
 // Rest of the functions definition go in here
