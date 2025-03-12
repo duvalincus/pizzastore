@@ -354,6 +354,28 @@ public class PizzaStore {
     * Creates a new user
     **/
    public static void CreateUser(PizzaStore esql){
+      /*login varchar(50) NOT NULL,
+                     password varchar(30) NOT NULL,
+                     role char(20) NOT NULL,
+                     favoriteItems text,
+                     phoneNum varchar(20) NOT NULL,
+                     PRIMARY KEY(login)*/
+      try {
+         System.out.println("Enter username: ");
+         String login = in.readLine();
+         System.out.println("Enter password:");
+         String password = in.readLine();
+         System.out.println("Enter phone number:");
+         String phoneNum = in.readLine();
+
+         String query = String.format("INSERT INTO User VALUES ('%s', '%s', 'customer', NULL, '%s')", login, password, phoneNum);
+      }
+      catch (Exception e){
+         System.out.println(e);
+         return null;
+      }
+
+
    }//end CreateUser
       
 
