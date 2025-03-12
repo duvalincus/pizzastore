@@ -368,11 +368,11 @@ public class PizzaStore {
          System.out.println("Enter phone number:");
          String phoneNum = in.readLine();
 
-         String query = String.format("INSERT INTO User VALUES ('%s', '%s', 'customer', NULL, '%s')", login, password, phoneNum);
+         String query = String.format("INSERT INTO Users VALUES ('%s', '%s', 'customer', NULL, '%s');", login, password, phoneNum);
+         esql.executeQueryAndPrintResult(query);
       }
       catch (Exception e){
          System.out.println(e);
-         return null;
       }
 
 
@@ -393,8 +393,10 @@ public class PizzaStore {
          List<List<String>> result = esql.executeQueryAndReturnResult(query);
          
          System.out.println(result);
+         System.out.println(result.get(0).get(1)); 
+         System.out.println(password);
 
-         if (result.get(1).get(0) == login && result.get(1).get(1) == password) {
+         if (result.get(0).get(0).toString() == login && result.get(0).get(1).toString() == password) {
             System.out.println("Username and password match! :}");
             return login;
          }
