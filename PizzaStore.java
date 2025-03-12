@@ -287,7 +287,7 @@ public class PizzaStore {
                 System.out.println(".........................");
                 System.out.println("20. Log out");
                 switch (readChoice()){
-                   case 1: viewProfile(esql); break;
+                   case 1: viewProfile(esql, authorisedUser); break;
                    case 2: updateProfile(esql); break;
                    case 3: viewMenu(esql); break;
                    case 4: placeOrder(esql); break;
@@ -392,11 +392,13 @@ public class PizzaStore {
          String query = String.format("SELECT u.login, u.password FROM Users u WHERE u.login = '%s' AND u.password = '%s'", login, password);
          List<List<String>> result = esql.executeQueryAndReturnResult(query);
          
-         System.out.println(result);
-         System.out.println(result.get(0).get(1)); 
-         System.out.println(password);
+         // debug printing:
+         // System.out.println(result);
+         // System.out.println(result.get(0).get(1)); 
+         // System.out.println(password);
+         // System.out.println(result.get(0).get(0).equals(login));
 
-         if (result.get(0).get(0).toString() == login && result.get(0).get(1).toString() == password) {
+         if (result.get(0).get(0).equals(login) && result.get(0).get(1).equals(password)) {
             System.out.println("Username and password match! :}");
             return login;
          }
@@ -413,7 +415,20 @@ public class PizzaStore {
 
 // Rest of the functions definition go in here
 
-   public static void viewProfile(PizzaStore esql) {}
+   public static void viewProfile(PizzaStore esql, String user) {
+      try {
+         String query = String.format("SELECT * FROM Users u WHERE u.login = '%s';", user);
+         // System.out.println(query);
+         List<List<String>> res = esql.executeQueryAndReturnResult(query);
+         // System.out.println(res);
+         System.out.println(String.format("\nProfile Info: \n\nLogin: %s \nPassword: %s \nFavorite Items: %s \nPhone Number: %s\n", 
+            res.get(0).get(0), res.get(0).get(1), res.get(0).get(3), res.get(0).get(4)));
+
+      }
+      catch(Exception e) {
+         System.out.println(e);
+      }
+   }
    public static void updateProfile(PizzaStore esql) {}
    public static void viewMenu(PizzaStore esql) {}
    public static void placeOrder(PizzaStore esql) {}
