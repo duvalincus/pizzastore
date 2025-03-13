@@ -330,7 +330,7 @@ public class PizzaStore {
          "*******************************************************\n");
    }//end Greeting
 
-   /*
+   /**
     * Reads the users choice given from the keyboard
     * @int
     **/
@@ -350,7 +350,7 @@ public class PizzaStore {
       return input;
    }//end readChoice
 
-   /*
+   /**
     * Creates a new user
     **/
    public static void CreateUser(PizzaStore esql){
@@ -379,7 +379,7 @@ public class PizzaStore {
    }//end CreateUser
       
 
-   /*
+   /**
     * Check log in credentials for an existing user
     * @return User login or null if the user does not exist
     **/
@@ -462,9 +462,64 @@ public class PizzaStore {
    }
    public static void placeOrder(PizzaStore esql) {}
    public static void viewAllOrders(PizzaStore esql, String login) {
-      
+      try {
+         // System.out.println(role);
+         String query = String.format("SELECT orderID FROM FoodOrder O");
+         List<List<String>> res;
+
+         if (isCustomer(esql, login)) {
+            // System.out.println("executing customer query");
+            res = esql.executeQueryAndReturnResult(
+               query += String.format(" WHERE O.login = '%s';", login));
+         } else {
+            // System.out.println("executing non-customer query");
+            res = esql.executeQueryAndReturnResult(query += ";");
+            // System.out.println(res);
+         }
+
+         if (!res.isEmpty()) {
+            for (int i = 0; i < res.size(); i++) {
+               System.out.println(String.format("Order %s: %s", String.valueOf(i), res.get(i).get(0)));
+            }
+         } else {
+            System.out.println("No orders found.");
+         }
+
+      } catch (Exception e) {
+         System.err.println(e);
+         ;
+      }
    }
-   public static void viewRecentOrders(PizzaStore esql, String login) {}
+   public static void viewRecentOrders(PizzaStore esql, String login) {
+      try {
+         // System.out.println(role);
+         String query = "SELECT orderID, orderTimestamp FROM FoodOrder O";
+         List<List<String>> res;
+         String mostRecent = " ORDER BY O.orderTimestamp DESC LIMIT 5;";
+
+         if (isCustomer(esql, login)) {
+            // System.out.println("executing customer query");
+            res = esql.executeQueryAndReturnResult(
+                  query + String.format(" WHERE O.login = '%s'" + mostRecent, login));
+         } else {
+            // System.out.println("executing non-customer query");
+            res = esql.executeQueryAndReturnResult(query + mostRecent);
+            // System.out.println(res);
+         }
+
+         if (!res.isEmpty()) {
+            for (int i = 0; i < res.size(); i++) {
+               System.out.println(String.format("Order %s: %s, time: %s", String.valueOf(i), res.get(i).get(0), res.get(i).get(1)));
+            }
+         } else {
+            System.out.println("No orders found.");
+         }
+
+      } catch (Exception e) {
+         System.err.println(e);
+         ;
+      }
+   }
    public static void viewOrderInfo(PizzaStore esql, String login) {
       try {
          System.out.println("Enter order ID to view: ");
@@ -477,7 +532,8 @@ public class PizzaStore {
             List<List<String>> res = esql.executeQueryAndReturnResult(
                String.format("SELECT * FROM FoodOrder O, ItemsInOrder I WHERE O.login = '%s' AND O.orderID = %s AND I.orderID = O.orderID;", login, orderID));
             if (!res.isEmpty()) {
-               System.out.println(res);
+               System.out.println(String.format("Order Time: %s\nTotal Price: %s\nOrder Status: %s\n",
+                     res.get(0).get(4), res.get(0).get(3), res.get(0).get(5)).trim());
             }
             else {
                System.out.println("Order is not your own, please choose your own order.\n");
@@ -654,9 +710,10 @@ public class PizzaStore {
 
    }
 
-   /*
+   /**
     * checks user login for their role
     * @param login login string
+    * @param esql sql object
     * @return true if user is a customer
     **/
    public static Boolean isCustomer(PizzaStore esql, String login) {
