@@ -430,7 +430,36 @@ public class PizzaStore {
       }
    }
    public static void updateProfile(PizzaStore esql) {}
-   public static void viewMenu(PizzaStore esql) {}
+   public static void viewMenu(PizzaStore esql) {
+      try {
+         System.out.println("item type?: ");
+         String filter = in.readLine();
+         System.out.println("price limit?: ");
+         String price = in.readLine();
+         System.out.println("sorted asc or desc? (enter nothing for no filter): ");
+         String sort = in.readLine();
+
+         String query = String.format("SELECT * FROM Items WHERE typeOfItem = '%s' AND price < %s;", filter, price);
+         // System.out.println(query);
+         if (!sort.isEmpty()) {
+            query = query.substring(0,query.length() - 1);
+            query+= "ORDER BY price " + sort + ";";
+         }
+
+         // System.out.println(query);
+         List<List<String>> res = esql.executeQueryAndReturnResult(query);
+         // System.out.println(res);
+         for (int i = 0; i < res.size(); i++) {
+            System.out.println(
+               String.format("Item: %s\nIngredients: %s\nType: %s\nPrice: %s\nDescription: %s\n", 
+                  res.get(i).get(0), res.get(i).get(1), res.get(i).get(2), res.get(i).get(3), res.get(i).get(4))
+            );
+         }
+
+      } catch (Exception e) {
+         System.err.println(e);
+      }
+   }
    public static void placeOrder(PizzaStore esql) {}
    public static void viewAllOrders(PizzaStore esql) {}
    public static void viewRecentOrders(PizzaStore esql) {}
