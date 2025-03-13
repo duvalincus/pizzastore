@@ -471,8 +471,7 @@ public class PizzaStore {
             // System.out.println("executing customer query");
             res = esql.executeQueryAndReturnResult(
                query += String.format(" WHERE O.login = '%s';", login));
-         }
-         else {
+         } else {
             // System.out.println("executing non-customer query");
             res = esql.executeQueryAndReturnResult(query += ";");
             // System.out.println(res);
@@ -482,8 +481,7 @@ public class PizzaStore {
             for (int i = 0; i < res.size(); i++) {
                System.out.println(String.format("Order %s: %s", String.valueOf(i), res.get(i).get(0)));
             }
-         }
-         else {
+         } else {
             System.out.println("No orders found.");
          }
 
@@ -492,7 +490,36 @@ public class PizzaStore {
          ;
       }
    }
-   public static void viewRecentOrders(PizzaStore esql, String login) {}
+   public static void viewRecentOrders(PizzaStore esql, String login) {
+      try {
+         // System.out.println(role);
+         String query = "SELECT orderID, orderTimestamp FROM FoodOrder O";
+         List<List<String>> res;
+         String mostRecent = " ORDER BY O.orderTimestamp DESC LIMIT 5;";
+
+         if (isCustomer(esql, login)) {
+            // System.out.println("executing customer query");
+            res = esql.executeQueryAndReturnResult(
+                  query + String.format(" WHERE O.login = '%s'" + mostRecent, login));
+         } else {
+            // System.out.println("executing non-customer query");
+            res = esql.executeQueryAndReturnResult(query + mostRecent);
+            // System.out.println(res);
+         }
+
+         if (!res.isEmpty()) {
+            for (int i = 0; i < res.size(); i++) {
+               System.out.println(String.format("Order %s: %s, time: %s", String.valueOf(i), res.get(i).get(0), res.get(i).get(1)));
+            }
+         } else {
+            System.out.println("No orders found.");
+         }
+
+      } catch (Exception e) {
+         System.err.println(e);
+         ;
+      }
+   }
    public static void viewOrderInfo(PizzaStore esql, String login) {
       try {
          System.out.println("Enter order ID to view: ");
