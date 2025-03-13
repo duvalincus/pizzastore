@@ -296,8 +296,8 @@ public class PizzaStore {
                    case 7: viewOrderInfo(esql, authorisedUser); break;
                    case 8: viewStores(esql); break;
                    case 9: updateOrderStatus(esql); break;
-                   case 10: updateMenu(esql); break;
-                   case 11: updateUser(esql); break;
+                   case 10: updateMenu(esql, authorisedUser); break;
+                   case 11: updateUser(esql, authorisedUser); break;
 
 
 
@@ -519,8 +519,93 @@ public class PizzaStore {
       }
    }
    public static void updateOrderStatus(PizzaStore esql) {}
-   public static void updateMenu(PizzaStore esql) {}
-   public static void updateUser(PizzaStore esql) {}
+
+   public static void updateMenu(PizzaStore esql, String login) {
+      //Check if manager
+      // if(!isRole(esql, login, "manager")){
+      //    System.out.println("You do not have access to this option! Darn customers...");
+      //    return;
+      // }
+
+      //Ask whether to add new item or update existing:
+      System.out.println("Please select an option: ");
+      System.out.println("1 - Add new item");
+      System.out.println("2 - Update existing item");
+
+      try {
+         switch (readChoice()){
+            case 1: //New Item
+               System.out.println("Enter item name: ");
+               String name = in.readLine();
+               System.out.println("Enter ingredients: ");
+               String ingredients = in.readLine();
+               System.out.println("Enter type of item");
+               String type = in.readLine();
+               System.out.println("Enter price:");
+               float price = Float.parseFloat(in.readLine());
+               System.out.println("Enter description");
+               String desc = in.readLine();
+
+               String query = String.format("INSERT INTO Items VALUES ('%s', '%s', '%s', %f, '%s');", name, ingredients, type, price, desc);
+               esql.executeQuery(query);
+
+               break;
+            case 2: //Existing
+               System.out.println("Enter item name: ");
+               String updateName = in.readLine();
+
+               //Does item exist?
+               String q1 = String.format("SELECT COUNT(DISTINCT i.itemName) FROM Items i WHERE i.itemName = '%s'", updateName );
+               List<List<String>> item = esql.executeQueryAndReturnResult(q1);
+               // System.out.println(" WHATTT " +  item.get(0).get(0));
+               if (Integer.parseInt(item.get(0).get(0)) <= 0){// DOes not exists
+                  System.out.println("Item does not exist.");
+                  return;
+               }
+
+               //Update Item
+               //Print Current Values:
+               q1 = String.format("SELECT * FROM Items i WHERE i.itemName = '%s'", updateName );
+               item = esql.executeQueryAndReturnResult(q1);
+               System.out.println("Current Values: ");
+               System.out.println("Name: " + item.get(0).get(0));
+               System.out.println("Ingredients: " + item.get(0).get(1));
+               System.out.println("Type of Item: " + item.get(0).get(2));
+               System.out.println("Price " + item.get(0).get(3));
+               System.out.println("Description: " + item.get(0).get(4));
+
+               System.out.println("Updating Item Info:");
+               System.out.println("Enter new item name: ");
+               String newName = in.readLine();
+               System.out.println("Enter new ingredients: ");
+               String newIngredients = in.readLine();
+               System.out.println("Enter new type of item");
+               String newType = in.readLine();
+               System.out.println("Enter new price:");
+               float newPrice = Float.parseFloat(in.readLine());
+               System.out.println("Enter new description");
+               String newDesc = in.readLine();
+
+               String q2 = String.format("UPDATE Items SET ingredients = '%s', typeOfItem = '%s', price = '%f', description= '%s' WHERE itemName = '%s';",  newIngredients, newType, newPrice, newDesc, updateName);
+               esql.executeQuery(q2);
+
+               break;         
+            default : System.out.println("Unrecognized choice!"); break;
+            }
+      } catch (Exception e) {
+         System.out.println(e);
+      }
+      
+
+   }
+
+
+   public static void updateUser(PizzaStore esql, String login) {
+      //Check if manager
+
+      //
+
+   }
 
    /*
     * checks user login for their role
@@ -542,6 +627,21 @@ public class PizzaStore {
       return false;
    }
 
+
+   public static Boolean isRole(PizzaStore esql, String login, String role) {
+      try {
+         List<List<String>> res = esql.executeQueryAndReturnResult(String.format("SELECT role FROM Users WHERE login = '%s';", login));
+   
+         // System.out.println(res.get(0).get(0));
+         
+         // i love good data godblessit
+         return res.get(0).get(0).trim().contains(role);
+         
+      } catch (Exception e) {
+         System.err.println(e);
+      }
+      return false;
+   }
 
 }//end PizzaStore
 
