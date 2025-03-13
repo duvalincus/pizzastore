@@ -291,9 +291,9 @@ public class PizzaStore {
                    case 2: updateProfile(esql); break;
                    case 3: viewMenu(esql); break;
                    case 4: placeOrder(esql); break;
-                   case 5: viewAllOrders(esql); break;
-                   case 6: viewRecentOrders(esql); break;
-                   case 7: viewOrderInfo(esql); break;
+                   case 5: viewAllOrders(esql, authorisedUser); break;
+                   case 6: viewRecentOrders(esql, authorisedUser); break;
+                   case 7: viewOrderInfo(esql, authorisedUser); break;
                    case 8: viewStores(esql); break;
                    case 9: updateOrderStatus(esql); break;
                    case 10: updateMenu(esql); break;
@@ -440,7 +440,7 @@ public class PizzaStore {
          String sort = in.readLine();
 
          String query = String.format("SELECT * FROM Items WHERE typeOfItem = '%s' AND price < %s;", filter, price);
-         // System.out.println(query);
+         System.out.println(query);
          if (!sort.isEmpty()) {
             query = query.substring(0,query.length() - 1);
             query+= "ORDER BY price " + sort + ";";
@@ -461,13 +461,86 @@ public class PizzaStore {
       }
    }
    public static void placeOrder(PizzaStore esql) {}
-   public static void viewAllOrders(PizzaStore esql) {}
-   public static void viewRecentOrders(PizzaStore esql) {}
-   public static void viewOrderInfo(PizzaStore esql) {}
-   public static void viewStores(PizzaStore esql) {}
+   public static void viewAllOrders(PizzaStore esql, String login) {
+      
+   }
+   public static void viewRecentOrders(PizzaStore esql, String login) {}
+   public static void viewOrderInfo(PizzaStore esql, String login) {
+      try {
+         System.out.println("Enter order ID to view: ");
+         String orderID = in.readLine();
+   
+         // System.out.println(role);
+         
+         if (isCustomer(esql, login)) {
+            // System.out.println("executing customer query");
+            List<List<String>> res = esql.executeQueryAndReturnResult(
+               String.format("SELECT * FROM FoodOrder O, ItemsInOrder I WHERE O.login = '%s' AND O.orderID = %s AND I.orderID = O.orderID;", login, orderID));
+            if (!res.isEmpty()) {
+               System.out.println(res);
+            }
+            else {
+               System.out.println("Order is not your own, please choose your own order.\n");
+            }
+         }
+
+         else {
+            // System.out.println("executing non-customer query");
+            List<List<String>> res = esql.executeQueryAndReturnResult(
+                  String.format("SELECT * FROM FoodOrder O, ItemsInOrder I WHERE O.orderID = %s AND O.orderID = I.orderID;", orderID));
+            
+            System.out.println(String.format("Order Time: %s\nTotal Price: %s\nOrder Status: %s\n",
+               res.get(0).get(4), res.get(0).get(3), res.get(0).get(5)).trim());
+            System.out.println("Items:");
+                  for (int i = 0; i < res.size(); i++) {
+                     System.out.println(String.format("\tItem:  %s, Quantity: %s", res.get(i).get(7), res.get(i).get(8)));
+            }
+            // System.out.println(res);
+         }
+         
+      } catch (Exception e) {
+         System.err.println(e);;
+      }
+   }
+   public static void viewStores(PizzaStore esql) {
+      try {
+         String query = String.format("SELECT * FROM Store;");
+         // System.out.println(query);
+         List<List<String>> res = esql.executeQueryAndReturnResult(query);
+         // System.out.println(res);
+         for (int i = 0; i < res.size(); i++) {
+            System.out.println(
+                  String.format("StoreID : %s\nAddress: %s, %s, %s \nIsOpen?: %s \nReview Score: %s\n",
+                        res.get(i).get(0), res.get(i).get(1), res.get(i).get(2), res.get(i).get(3), res.get(i).get(4), res.get(i).get(5)));
+         }
+
+      } catch (Exception e) {
+         System.out.println(e);
+      }
+   }
    public static void updateOrderStatus(PizzaStore esql) {}
    public static void updateMenu(PizzaStore esql) {}
    public static void updateUser(PizzaStore esql) {}
+
+   /*
+    * checks user login for their role
+    * @param login login string
+    * @return true if user is a customer
+    **/
+   public static Boolean isCustomer(PizzaStore esql, String login) {
+      try {
+         List<List<String>> res = esql.executeQueryAndReturnResult(String.format("SELECT role FROM Users WHERE login = '%s';", login));
+   
+         // System.out.println(res.get(0).get(0));
+         
+         // i hate bad data goddammit
+         return res.get(0).get(0).trim().contains("customer");
+         
+      } catch (Exception e) {
+         System.err.println(e);
+      }
+      return false;
+   }
 
 
 }//end PizzaStore
