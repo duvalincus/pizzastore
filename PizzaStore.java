@@ -522,10 +522,10 @@ public class PizzaStore {
 
    public static void updateMenu(PizzaStore esql, String login) {
       //Check if manager
-      // if(!isRole(esql, login, "manager")){
-      //    System.out.println("You do not have access to this option! Darn customers...");
-      //    return;
-      // }
+      if(!isRole(esql, login, "manager")){
+         System.out.println("You do not have access to this option! Darn customers...");
+         return;
+      }
 
       //Ask whether to add new item or update existing:
       System.out.println("Please select an option: ");
@@ -571,7 +571,7 @@ public class PizzaStore {
                System.out.println("Name: " + item.get(0).get(0));
                System.out.println("Ingredients: " + item.get(0).get(1));
                System.out.println("Type of Item: " + item.get(0).get(2));
-               System.out.println("Price " + item.get(0).get(3));
+               System.out.println("Price: " + item.get(0).get(3));
                System.out.println("Description: " + item.get(0).get(4));
 
                System.out.println("Updating Item Info:");
@@ -602,8 +602,55 @@ public class PizzaStore {
 
    public static void updateUser(PizzaStore esql, String login) {
       //Check if manager
+      if(!isRole(esql, login, "manager")){
+         System.out.println("You do not have access to this option! Darn customers...");
+         return;
+      }
+      
+      //Choose user:
+      System.out.println("Enter User name: ");
 
-      //
+      try{
+         String updateName = in.readLine();
+
+         String query = String.format("SELECT COUNT(DISTINCT u.login) FROM Users u WHERE u.login = '%s'", updateName );
+         List<List<String>> user = esql.executeQueryAndReturnResult(query);
+         
+         //Check if exists
+         if (Integer.parseInt(user.get(0).get(0)) <= 0){// DOes not exists
+            System.out.println("User does not exist.");
+            return;
+         }
+
+         //Update:
+         //Print existing
+         query = String.format("SELECT * FROM Users u WHERE u.login = '%s'", updateName);
+         user = esql.executeQueryAndReturnResult(query);
+         System.out.println("Current Info: ");
+         System.out.println("Login: " + user.get(0).get(0));
+         System.out.println("Password: " + user.get(0).get(1));
+         System.out.println("Role: " + user.get(0).get(2));
+         System.out.println("Favorite Item: " + user.get(0).get(3));
+         System.out.println("Phone Number: " + user.get(0).get(4));
+
+         //Updating:
+         System.out.println("Updating User Info:");
+         System.out.println("Enter new login: ");
+         String newLogin = in.readLine();
+         System.out.println("Enter new password: ");
+         String newPass = in.readLine();
+         System.out.println("Enter new role:");
+         String newRole = in.readLine();
+         System.out.println("Enter new favorite item:");
+         String newFav = in.readLine();
+         System.out.println("Enter new phone number:");
+         String newNum = in.readLine();
+
+         String q2 = String.format("UPDATE Users SET login = '%s', password = '%s', role = '%s', favoriteItems = '%s', phoneNum= '%s' WHERE login = '%s';",  newLogin, newPass, newRole, newFav, newNum, updateName);
+         esql.executeQuery(q2);
+      } catch (Exception e) {
+         System.out.println(e);
+      }
 
    }
 
