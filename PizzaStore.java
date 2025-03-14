@@ -40,6 +40,9 @@ public class PizzaStore {
    static BufferedReader in = new BufferedReader(
                                 new InputStreamReader(System.in));
 
+   //OrderCounter:
+   static int orderCounter;
+
    /**
     * Creates a new instance of PizzaStore
     *
@@ -65,6 +68,7 @@ public class PizzaStore {
          System.out.println("Make sure you started postgres on this machine");
          System.exit(-1);
       }//end catch
+
    }//end PizzaStore
 
    /**
@@ -247,6 +251,7 @@ public class PizzaStore {
          String dbport = args[1];
          String user = args[2];
          esql = new PizzaStore (dbname, dbport, user, "");
+         orderCounter = getCurrentAvailableOrderID(esql);
 
          boolean keepon = true;
          while(keepon) {
@@ -290,7 +295,7 @@ public class PizzaStore {
                    case 1: viewProfile(esql, authorisedUser); break;
                    case 2: updateProfile(esql); break;
                    case 3: viewMenu(esql); break;
-                   case 4: placeOrder(esql); break;
+                   case 4: placeOrder(esql, authorisedUser); break;
                    case 5: viewAllOrders(esql, authorisedUser); break;
                    case 6: viewRecentOrders(esql, authorisedUser); break;
                    case 7: viewOrderInfo(esql, authorisedUser); break;
@@ -369,7 +374,7 @@ public class PizzaStore {
          String phoneNum = in.readLine();
 
          String query = String.format("INSERT INTO Users VALUES ('%s', '%s', 'customer', NULL, '%s');", login, password, phoneNum);
-         esql.executeQueryAndPrintResult(query);
+         esql.executeUpdate(query);
       }
       catch (Exception e){
          System.out.println(e);
@@ -460,7 +465,87 @@ public class PizzaStore {
          System.err.println(e);
       }
    }
-   public static void placeOrder(PizzaStore esql) {}
+
+
+   public static void placeOrder(PizzaStore esql, String login) {
+      
+      try{
+         //Choose Store
+         System.out.println("Which store would you like to order from? (Please input StoreID): ");
+         String storeID = in.readLine();
+
+         String query = String.format("SELECT s.storeID FROM Store s WHERE s.storeID = '%s';", storeID );
+         List<List<String>> store = esql.executeQueryAndReturnResult(query);
+         
+         //Check if exists
+         if (store.isEmpty()){// DOes not exists
+            System.out.println("Store does not exist.");
+            return;
+         }
+
+         System.out.println(orderCounter);
+         query = String.format("INSERT INTO FoodOrder VALUES('%d', '%s', '%d', 0, NOW(), 'placed');", orderCounter, login, Integer.parseInt(store.get(0).get(0)));
+         System.out.println("Does it go past query creation?");
+         esql.executeUpdate(query);
+         System.out.println("Does it go past the query?");
+         
+
+         //Enter Item (Need to create an ItemsInOrder entry for each food item)
+         boolean enteringItems = true;
+         float currentSum = 0;
+         while(enteringItems){
+            System.out.println("Please enter Item Name");
+            String itemName = in.readLine();
+
+            query = String.format("SELECT * FROM Items i WHERE i.itemName = '%s';",  itemName);
+            List<List<String>> item = esql.executeQueryAndReturnResult(query);
+           
+            
+            //Check if exists
+            if (item.isEmpty()){// DOes not exists
+               System.out.println("Item does not exist.");
+               continue;
+            }
+
+            //Get Quantity: 
+            System.out.println("Enter Quantity: ");
+            int quantity = Integer.parseInt(in.readLine());
+            
+            currentSum += Float.parseFloat(item.get(0).get(3)) * quantity;
+
+            //Insert into ItemsInOrder:
+            query = String.format("INSERT INTO ItemsInOrder VALUES ('%d', '%s', '%d')", orderCounter, itemName, quantity);
+            esql.executeUpdate(query);
+
+            System.out.println("Would you like to add any more items?");
+            System.out.println("1 - Yes");
+            System.out.println("2 - No, take me back to the menu.");
+            switch(readChoice()){
+               case 1:
+                  break;
+               case 2:
+                  enteringItems = false;
+                  break;
+               default: System.out.println("Unrecognized choice!"); break;
+            }
+         }
+
+         //Total Price
+         System.out.println("Current Price: " + currentSum);
+
+         //Adjusting FoodOrders:
+         query = String.format("UPDATE FoodOrder SET totalPrice = %f WHERE orderID= %d", currentSum, orderCounter);
+         esql.executeUpdate(query);
+
+         orderCounter++;
+
+      }catch(Exception e){
+         System.err.println(e);
+      }
+
+   }
+
+
    public static void viewAllOrders(PizzaStore esql, String login) {
       try {
          // System.out.println(role);
@@ -487,7 +572,6 @@ public class PizzaStore {
 
       } catch (Exception e) {
          System.err.println(e);
-         ;
       }
    }
    public static void viewRecentOrders(PizzaStore esql, String login) {
@@ -603,7 +687,7 @@ public class PizzaStore {
                String desc = in.readLine();
 
                String query = String.format("INSERT INTO Items VALUES ('%s', '%s', '%s', %f, '%s');", name, ingredients, type, price, desc);
-               esql.executeQuery(query);
+               esql.executeUpdate(query);
 
                break;
             case 2: //Existing
@@ -731,7 +815,7 @@ public class PizzaStore {
       return false;
    }
 
-
+// Helper Functions:
    public static Boolean isRole(PizzaStore esql, String login, String role) {
       try {
          List<List<String>> res = esql.executeQueryAndReturnResult(String.format("SELECT role FROM Users WHERE login = '%s';", login));
@@ -745,6 +829,16 @@ public class PizzaStore {
          System.err.println(e);
       }
       return false;
+   }
+
+   public static int getCurrentAvailableOrderID(PizzaStore esql){
+      try{
+         return Integer.parseInt(esql.executeQueryAndReturnResult("SELECT MAX(orderID) FROM FoodOrder").get(0).get(0))+1;
+      } catch (Exception e) {
+         System.err.println(e);
+      }
+
+      return -1;
    }
 
 }//end PizzaStore
