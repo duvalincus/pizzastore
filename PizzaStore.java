@@ -300,7 +300,7 @@ public class PizzaStore {
                    case 6: viewRecentOrders(esql, authorisedUser); break;
                    case 7: viewOrderInfo(esql, authorisedUser); break;
                    case 8: viewStores(esql); break;
-                   case 9: updateOrderStatus(esql); break;
+                   case 9: updateOrderStatus(esql, authorisedUser); break;
                    case 10: updateMenu(esql, authorisedUser); break;
                    case 11: updateUser(esql, authorisedUser); break;
 
@@ -708,7 +708,28 @@ public class PizzaStore {
          System.out.println(e);
       }
    }
-   public static void updateOrderStatus(PizzaStore esql) {}
+   public static void updateOrderStatus(PizzaStore esql, String login) {
+      try {
+         if (isCustomer(esql, login)) {
+            System.out.println("You do not have access to this operation! Darn customers... ");
+            return;
+         }
+   
+         System.out.println("Enter order ID to update: ");
+         String orderID = in.readLine();
+   
+         System.out.println("Enter order status: ");
+         String status = in.readLine();
+         // System.out.println(role);
+         
+         //S-> aaa X bb#aa X bbb
+         esql.executeUpdate(String.format("UPDATE FoodOrder SET orderStatus = '%s' WHERE orderID = %s;", status, orderID));
+         System.out.println(String.format("Order %s changed", orderID));
+      }
+      catch (Exception e) {
+         System.err.println(e);
+      }
+   }
 
    public static void updateMenu(PizzaStore esql, String login) {
       //Check if manager
