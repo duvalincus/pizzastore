@@ -293,7 +293,7 @@ public class PizzaStore {
                 System.out.println("20. Log out");
                 switch (readChoice()){
                    case 1: viewProfile(esql, authorisedUser); break;
-                   case 2: updateProfile(esql); break;
+                   case 2: updateProfile(esql, authorisedUser); break;
                    case 3: viewMenu(esql); break;
                    case 4: placeOrder(esql, authorisedUser); break;
                    case 5: viewAllOrders(esql, authorisedUser); break;
@@ -434,7 +434,57 @@ public class PizzaStore {
          System.out.println(e);
       }
    }
-   public static void updateProfile(PizzaStore esql) {}
+
+   public static void updateProfile(PizzaStore esql, String login) {
+      
+      try{
+         String query = String.format("SELECT DISTINCT * FROM Users u WHERE u.login = '%s' ", login);
+         List<List<String>> profile = esql.executeQueryAndReturnResult(query);
+
+         viewProfile(esql, login);
+
+         System.out.println("Would you to edit your profile?");
+         System.out.println("1 - Yes");
+         System.out.println("2 - No, take me back to the menu.");
+         switch(readChoice()){
+            case 1:
+               break;
+            case 2:
+               return;
+            default: System.out.println("Unrecognized choice!"); break;
+         }
+
+         System.out.println("Please select which option you would like to edit: ");
+         System.out.println("1 - Password");
+         System.out.println("2 - Favorite Item");
+         System.out.println("3 - Phone Number");
+         System.out.println("4 - No thanks, I'm done.");
+         switch(readChoice()){
+            case 1:
+               System.out.println("Enter new password.");
+               String pass = in.readLine();
+               esql.executeUpdate(String.format("UPDATE Users SET password = '%s' WHERE login = '%s' ;", pass, login));
+               break;
+            case 2:
+               System.out.println("Enter new Favorite Item(s).");
+               String fav = in.readLine();
+               esql.executeUpdate(String.format("UPDATE Users SET favoriteItems = '%s' WHERE login = '%s' ;", fav, login));
+               return;
+            case 3:
+               System.out.println("Enter new Phone Number.");
+               String num = in.readLine();
+               esql.executeUpdate(String.format("UPDATE Users SET phoneNum = '%s' WHERE login = '%s' ;", num, login));
+               break;
+            case 4: 
+               return;
+            default: System.out.println("Unrecognized choice!"); break;
+         }
+      } catch (Exception e){
+         System.err.println(e);
+      }     
+   }
+
+
    public static void viewMenu(PizzaStore esql) {
       try {
          System.out.println("item type?: ");
@@ -485,9 +535,9 @@ public class PizzaStore {
 
          System.out.println(orderCounter);
          query = String.format("INSERT INTO FoodOrder VALUES('%d', '%s', '%d', 0, NOW(), 'placed');", orderCounter, login, Integer.parseInt(store.get(0).get(0)));
-         System.out.println("Does it go past query creation?");
+         // System.out.println("Does it go past query creation?");
          esql.executeUpdate(query);
-         System.out.println("Does it go past the query?");
+         // System.out.println("Does it go past the query?");
          
 
          //Enter Item (Need to create an ItemsInOrder entry for each food item)
