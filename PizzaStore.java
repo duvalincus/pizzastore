@@ -765,8 +765,6 @@ public class PizzaStore {
                System.out.println("Description: " + item.get(0).get(4));
 
                System.out.println("Updating Item Info:");
-               System.out.println("Enter new item name: ");
-               String newName = in.readLine();
                System.out.println("Enter new ingredients: ");
                String newIngredients = in.readLine();
                System.out.println("Enter new type of item");
@@ -823,23 +821,59 @@ public class PizzaStore {
          System.out.println("Favorite Item: " + user.get(0).get(3));
          System.out.println("Phone Number: " + user.get(0).get(4));
 
-         //Updating:
-         System.out.println("Updating User Info:");
-         System.out.println("Enter new login: ");
-         String newLogin = in.readLine();
-         System.out.println("Enter new password: ");
-         String newPass = in.readLine();
-         System.out.println("Enter new role:");
-         String newRole = in.readLine();
-         System.out.println("Enter new favorite item:");
-         String newFav = in.readLine();
-         System.out.println("Enter new phone number:");
-         String newNum = in.readLine();
 
-         String q2 = String.format("UPDATE Users SET login = '%s', password = '%s', role = '%s', favoriteItems = '%s', phoneNum= '%s' WHERE login = '%s';",  newLogin, newPass, newRole, newFav, newNum, updateName);
-         esql.executeQuery(q2);
-      } catch (Exception e) {
-         System.out.println(e);
+         //Updating:
+         System.out.println("Would you to edit this profile?");
+         System.out.println("1 - Yes");
+         System.out.println("2 - No, take me back to the menu.");
+         switch(readChoice()){
+            case 1:
+               break;
+            case 2:
+               return;
+            default: System.out.println("Unrecognized choice!"); break;
+         }
+
+         System.out.println("Please select which option you would like to edit: ");
+         System.out.println("1 - Login");
+         System.out.println("2 - Password");
+         System.out.println("3 - Role");
+         System.out.println("4 - Favorite Item");
+         System.out.println("5 - Phone Number");
+         System.out.println("6 - No thanks, I'm done.");
+         switch(readChoice()){
+            case 1:
+               System.out.println("Enter new login.");
+               String log = in.readLine();
+               esql.executeUpdate(String.format("UPDATE Users SET login = '%s' WHERE login = '%s' ;", log, updateName));
+               break;
+            case 2:
+               System.out.println("Enter new password.");
+               String pass = in.readLine();
+               esql.executeUpdate(String.format("UPDATE Users SET password = '%s' WHERE login = '%s' ;", pass, updateName));
+               break;
+            case 3:
+               System.out.println("Enter new role.");
+               String role = in.readLine();
+               esql.executeUpdate(String.format("UPDATE Users SET role = '%s' WHERE login = '%s' ;", role, updateName));
+               return;
+            case 4:
+               System.out.println("Enter new Favorite Item(s).");
+               String fav = in.readLine();
+               esql.executeUpdate(String.format("UPDATE Users SET favoriteItems = '%s' WHERE login = '%s' ;", fav, updateName));
+               return;
+            case 5:
+               System.out.println("Enter new Phone Number.");
+               String num = in.readLine();
+               esql.executeUpdate(String.format("UPDATE Users SET phoneNum = '%s' WHERE login = '%s' ;", num, updateName));
+               break;
+            case 6: 
+               return;
+            default: System.out.println("Unrecognized choice!"); break;
+         }
+
+      } catch(Exception e){
+         System.err.println(e);
       }
 
    }
