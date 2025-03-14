@@ -443,7 +443,7 @@ public class PizzaStore {
 
          viewProfile(esql, login);
 
-         System.out.println("Would you to edit your profile?");
+         System.out.println("Would you like to edit your profile?");
          System.out.println("1 - Yes");
          System.out.println("2 - No, take me back to the menu.");
          switch(readChoice()){
@@ -658,35 +658,32 @@ public class PizzaStore {
       try {
          System.out.println("Enter order ID to view: ");
          String orderID = in.readLine();
+         List<List<String>> res;
    
          // System.out.println(role);
          
          if (isCustomer(esql, login)) {
             // System.out.println("executing customer query");
-            List<List<String>> res = esql.executeQueryAndReturnResult(
+            res = esql.executeQueryAndReturnResult(
                String.format("SELECT * FROM FoodOrder O, ItemsInOrder I WHERE O.login = '%s' AND O.orderID = %s AND I.orderID = O.orderID;", login, orderID));
-            if (!res.isEmpty()) {
-               System.out.println(String.format("Order Time: %s\nTotal Price: %s\nOrder Status: %s\n",
-                     res.get(0).get(4), res.get(0).get(3), res.get(0).get(5)).trim());
-            }
-            else {
-               System.out.println("Order is not your own, please choose your own order.\n");
+            if (res.isEmpty()) {
+               System.out.println("Own order not found, please choose your own order.\n");
             }
          }
 
          else {
             // System.out.println("executing non-customer query");
-            List<List<String>> res = esql.executeQueryAndReturnResult(
+            res = esql.executeQueryAndReturnResult(
                   String.format("SELECT * FROM FoodOrder O, ItemsInOrder I WHERE O.orderID = %s AND O.orderID = I.orderID;", orderID));
             
+            // System.out.println(res);
+         }
             System.out.println(String.format("Order Time: %s\nTotal Price: %s\nOrder Status: %s\n",
                res.get(0).get(4), res.get(0).get(3), res.get(0).get(5)).trim());
             System.out.println("Items:");
                   for (int i = 0; i < res.size(); i++) {
                      System.out.println(String.format("\tItem:  %s, Quantity: %s", res.get(i).get(7), res.get(i).get(8)));
             }
-            // System.out.println(res);
-         }
          
       } catch (Exception e) {
          System.err.println(e);;
