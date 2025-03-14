@@ -495,7 +495,7 @@ public class PizzaStore {
          String sort = in.readLine();
 
          String query = String.format("SELECT * FROM Items WHERE typeOfItem = '%s' AND price < %s;", filter, price);
-         System.out.println(query);
+         // System.out.println(query);
          if (!sort.isEmpty()) {
             query = query.substring(0,query.length() - 1);
             query+= "ORDER BY price " + sort + ";";
@@ -533,7 +533,7 @@ public class PizzaStore {
             return;
          }
 
-         System.out.println(orderCounter);
+         // System.out.println(orderCounter);
          query = String.format("INSERT INTO FoodOrder VALUES('%d', '%s', '%d', 0, NOW(), 'placed');", orderCounter, login, Integer.parseInt(store.get(0).get(0)));
          // System.out.println("Does it go past query creation?");
          esql.executeUpdate(query);
